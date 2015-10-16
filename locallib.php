@@ -48,12 +48,25 @@ function block_otrs_notifications_course_completed($event) {
             // create a ticket in OTRS
             $subject = 'User ' . $user->firstname . ' ' . $user->lastname . '(' . $user->username . ') completed course ' . $course->fullname;
             $message = 'User ' . $user->firstname . ' ' . $user->lastname . '(' . $user->username . ') has completed the course ' . $course->fullname;
-        
+
             // update user record on OTRS.
-            otrslib::userupdate($event);
-        
+            otrslib::userupdate($user);
+
+            if($block->config->coursequeue) {
+                $queue = $block->config->coursequeue;
+            } else {
+                $queue = get_config('block_otrs','completion_queue');
+            }
+            
+            // Setup dynamic fields.
+            $dfields = array();
+            $cdfield = get_config('block_otrs','course_dfield');
+            if($cdfield && $cdfield != '' ) {
+                $dfields[$cdfield] = $course->shortname;
+            }
+
             $otrssoap = new otrsgenericinterface();
-            $Ticket = $otrssoap->TicketCreate( $user->username, $subject, $message, get_config('block_otrs','completion_queue'), 'system', 'note-report');
+            $Ticket = $otrssoap->TicketCreate( $user->username, $subject, $message, $queue, 'system', 'note-report', 'text/html', 3, $dfields);
         }
     }
 }
@@ -73,7 +86,7 @@ function block_otrs_notifications_quiz_attempt_submitted($event) {
             if (in_array($event->quizid, $block->config->selectedquizes)) {
                 require_once( $CFG->dirroot.'/blocks/otrs/otrsgenericinterface.class.php' );
                 require_once( $CFG->dirroot.'/blocks/otrs/otrslib.class.php' );
-    
+
                 $user = $DB->get_record('user', array('id' => $event->userid));
                 $course = $DB->get_record('course', array('id' => $event->courseid));
                 $quiz = $DB->get_record('quiz', array('id' => $event->quizid));
@@ -92,24 +105,39 @@ function block_otrs_notifications_quiz_attempt_submitted($event) {
                 $subject = 'User ' . $user->firstname . ' ' . $user->lastname . '(' . $user->username . ') attempted quiz ' . $quiz->name;
                 $message = 'User ' . $user->firstname . ' ' . $user->lastname . '(' . $user->username . ') in the course ' . $course->fullname;
                 $message = ' with the result of ' . $result;
-                
+
                 $dfields = array();
-                
+
                 $markdfield = get_config('block_otrs','qmark_dfield');
                 if($markdfield){
                     $dfields[$markdfield] = $usergrade;
                 }
-            
+
                 $gradedfield = get_config('block_otrs','qgrade_dfield');
                 if($gradedfield) {
                     $dfields[$gradedfield] = $result;
                 }
-            
+                
+                $cdfield = get_config('block_otrs','course_dfield');
+                if($cdfield && $cdfield != '' && $course->id > 1) {
+                    $dfields[$cdfield] = $course->shortname;
+                }
+                $mdfield = get_config('block_otrs','module_dfield');
+                if($mdfield && $mdfield != '' ) {
+                    $dfields[$mdfield] = $quiz->name;
+                }
+
                 // update user record on OTRS.
-                otrslib::userupdate($event);
-            
+                otrslib::userupdate($user);
+
+                if($block->config->quizqueue) {
+                    $queue = $block->config->quizqueue;
+                } else {
+                    $queue = get_config('block_otrs','quiz_queue');
+                }
+
                 $otrssoap = new otrsgenericinterface();
-                $Ticket = $otrssoap->TicketCreate( $user->username, $subject, $message, get_config('block_otrs','quiz_queue'), 'system', 'note-report', 'text/html', 3, $dfields);
+                $Ticket = $otrssoap->TicketCreate( $user->username, $subject, $message, $queue, 'system', 'note-report', 'text/html', 3, $dfields);
             }
         }
     }

@@ -23,8 +23,10 @@
  */
 
 $string['coursenotify'] = 'Send a notification on course completion?';
+$string['coursequeue'] = 'Queue for completion notifications (leave blank for site default)';
 $string['selectquizes'] = 'Select quizzes to send a notification on completion';
 $string['otrs_notifications:addinstance'] = 'Add a new OTRS Notifications block';
 $string['otrs_notifications:myaddinstance'] = 'Add a new OTRS Notifications block to My home';
 $string['otrs_notifications:configure'] = 'Configure the OTRS Notifications block';
 $string['pluginname'] = 'OTRS Notifications';
+$string['quizqueue'] = 'Queue for quiz notifications (leave blank for site default)';

@@ -27,8 +27,8 @@ class otrs_notifications {
 
     public static function get_quizes() {
         global $DB, $COURSE;
-        
-        $availablequizes = $DB->get_records_menu('quiz', array('course' => $COURSE->id), 'name', 'id,name'); 
+
+        $availablequizes = $DB->get_records_menu('quiz', array('course' => $COURSE->id), 'name', 'id,name');
         return $availablequizes;
     }
 }

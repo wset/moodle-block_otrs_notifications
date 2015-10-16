@@ -36,18 +36,22 @@ class block_otrs_notifications_edit_form extends block_edit_form {
         // Get options for course and quiz completion notifications.
         $block = $this->block;
         otrs_notifications::initialise_config( $block );
-        
+
         // Fields course completion and quiz notifications.
         $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
 
         $mform->addElement('checkbox', 'config_coursenotify', get_string('coursenotify', 'block_otrs_notifications'));
         $mform->setDefault('config_coursenotify', $block->config->config_coursenotify);
-        
+
+        $mform->addElement( 'text', 'config_coursequeue', get_string( 'coursequeue','block_otrs_notifications' ) );
+
         $availablequizes = otrs_notifications::get_quizes();
         $quizselect = $mform->addElement('select', 'config_selectedquizes', get_string('selectquizes', 'block_otrs_notifications'), $availablequizes);
         $quizselect->setMultiple(true);
         $mform->setDefault('config_selectedquizes', $block->config->config_selectedquizes);
-         
+
+        $mform->addElement( 'text', 'config_quizqueue', get_string( 'quizqueue','block_otrs_notifications' ) );
+
 
     }
 
