@@ -40,7 +40,7 @@ function block_otrs_notifications_course_completed($event) {
     // Does this block exist in this course?
     if ($block = block_otrs_notifications_get_block_info($event->course)) {
         if (!empty($block->config->coursenotify)) {
-            require_once( $CFG->dirroot.'/blocks/otrs/otrssoap.class.php' );
+            require_once( $CFG->dirroot.'/blocks/otrs/otrsgenericinterface.class.php' );
             require_once( $CFG->dirroot.'/blocks/otrs/otrslib.class.php' );
 
             $user = $DB->get_record('user', array('id' => $event->userid));
@@ -49,13 +49,11 @@ function block_otrs_notifications_course_completed($event) {
             $subject = 'User ' . $user->firstname . ' ' . $user->lastname . '(' . $user->username . ') completed course ' . $course->fullname;
             $message = 'User ' . $user->firstname . ' ' . $user->lastname . '(' . $user->username . ') has completed the course ' . $course->fullname;
         
-            // find/create the user in OTRS
-            $Data = otrslib::getUserId( $user );
+            // update user record on OTRS.
+            otrslib::userupdate($event);
         
-            $otrssoap = new otrssoap();
-            $TicketID = $otrssoap->TicketCreate( $subject, $Data['UserCustomerID'], $Data['UserEmail'], 'completion' );
-            $ArticleID = $otrssoap->ArticleCreate( $TicketID, $subject, $message, $user->email, 'Support', 'text/plain' );
-            $success = $otrssoap->TicketCustomerSet( $TicketID, $Data['UserCustomerID'], $Data['UserLogin'] );
+            $otrssoap = new otrsgenericinterface();
+            $Ticket = $otrssoap->TicketCreate( $user->username, $subject, $message, get_config('block_otrs','completion_queue'), 'system', 'note-report');
         }
     }
 }
@@ -73,7 +71,7 @@ function block_otrs_notifications_quiz_attempt_submitted($event) {
     if ($block = block_otrs_notifications_get_block_info($event->courseid)) {
         if (!empty($block->config->selectedquizes)) {
             if (in_array($event->quizid, $block->config->selectedquizes)) {
-                require_once( $CFG->dirroot.'/blocks/otrs/otrssoap.class.php' );
+                require_once( $CFG->dirroot.'/blocks/otrs/otrsgenericinterface.class.php' );
                 require_once( $CFG->dirroot.'/blocks/otrs/otrslib.class.php' );
     
                 $user = $DB->get_record('user', array('id' => $event->userid));
@@ -95,13 +93,12 @@ function block_otrs_notifications_quiz_attempt_submitted($event) {
                 $message = 'User ' . $user->firstname . ' ' . $user->lastname . '(' . $user->username . ') in the course ' . $course->fullname;
                 $message = ' with the result of ' . $result;
             
-                // find/create the user in OTRS
-                $Data = otrslib::getUserId( $user );
             
-                $otrssoap = new otrssoap();
-                $TicketID = $otrssoap->TicketCreate( $subject, $Data['UserCustomerID'], $Data['UserEmail'], 'quiz' );
-                $ArticleID = $otrssoap->ArticleCreate( $TicketID, $subject, $message, $user->email, 'Support', 'text/plain' );
-                $success = $otrssoap->TicketCustomerSet( $TicketID, $Data['UserCustomerID'], $Data['UserLogin'] );
+                // update user record on OTRS.
+                otrslib::userupdate($event);
+            
+                $otrssoap = new otrsgenericinterface();
+                $Ticket = $otrssoap->TicketCreate( $user->username, $subject, $message, get_config('block_otrs','quiz_queue'), 'system', 'note-report', 'text/html', 3, $dfields);
             }
         }
     }
