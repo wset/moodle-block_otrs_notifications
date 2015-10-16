@@ -92,7 +92,18 @@ function block_otrs_notifications_quiz_attempt_submitted($event) {
                 $subject = 'User ' . $user->firstname . ' ' . $user->lastname . '(' . $user->username . ') attempted quiz ' . $quiz->name;
                 $message = 'User ' . $user->firstname . ' ' . $user->lastname . '(' . $user->username . ') in the course ' . $course->fullname;
                 $message = ' with the result of ' . $result;
+                
+                $dfields = array();
+                
+                $markdfield = get_config('block_otrs','qmark_dfield');
+                if($markdfield){
+                    $dfields[$markdfield] = $usergrade;
+                }
             
+                $gradedfield = get_config('block_otrs','qgrade_dfield');
+                if($gradedfield) {
+                    $dfields[$gradedfield] = $result;
+                }
             
                 // update user record on OTRS.
                 otrslib::userupdate($event);
