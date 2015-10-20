@@ -24,10 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2014102200;        // The current plugin version (Date: YYYYMMDDXX)
-$plugin->requires  = 2014050800;        // Requires this Moodle version
+$plugin->version   = 2015101904;        // The current plugin version (Date: YYYYMMDDXX)
+$plugin->requires  = 2014051200;        // Requires Moodle 2.7
 $plugin->component = 'block_otrs_notifications';      // Full name of the plugin (used for diagnostics)
 $plugin->dependencies = array(
-    'block_otrs' => 2014102000,
+    'block_otrs' => 2015101900,
 );
-
+$plugin->release   = '2.0 for Moodle 2.7+ and OTRS v4.0+';
